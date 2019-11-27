@@ -12,18 +12,18 @@ public class Item {
 	
 	@Id
 	@ApiModelProperty(notes = "The unique number of the item")
-	private int    itemNumber;
+	private Integer itemNumber;
 	@ApiModelProperty(notes = "The name of the item")
-	private String itemName;
+	private String  itemName;
 	@ApiModelProperty(notes = "The number of item units in stock")
-	private int    itemAmount;
+	private Integer itemAmount;
 	@ApiModelProperty(notes = "The inventory code of the item")
-	private int    itemInventoryCode;
+	private Integer itemInventoryCode;
 	
 	public int getItemNumber() {
 		return itemNumber;
 	}
-	public void setItemNumber(int itemNumber) {
+	public void setItemNumber(Integer itemNumber) {
 		this.itemNumber = itemNumber;
 	}
 	public String getItemName() {
@@ -35,13 +35,13 @@ public class Item {
 	public int getItemAmount() {
 		return itemAmount;
 	}
-	public void setItemAmount(int itemAmount) {
+	public void setItemAmount(Integer itemAmount) {
 		this.itemAmount = itemAmount;
 	}
 	public int getItemInventoryCode() {
 		return itemInventoryCode;
 	}
-	public void setItemInventoryCode(int itemInventoryCode) {
+	public void setItemInventoryCode(Integer itemInventoryCode) {
 		this.itemInventoryCode = itemInventoryCode;
 	}
 	@Override

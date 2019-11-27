@@ -6,11 +6,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.openlegacy.dao.ItemRepo;
@@ -25,14 +25,9 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping("/api")
 public class ItemController {
 
+	
 	@Autowired
 	ItemRepo repo;
-	
-	@RequestMapping("/")
-	public String home() {
-		
-		return "home.jsp";
-	}
 	
 	@GetMapping("/items")
 	@ApiOperation(value = "Lists all the items currently in the inventory")
@@ -41,26 +36,36 @@ public class ItemController {
 		return repo.findAll();
 	}
 	
-	@RequestMapping("/item/{itemNumber}")
+	@GetMapping("/item")
 	@ApiOperation(value = "Fetches an item", notes = "Provide the number of the item to fetch", response = Item.class)
 	public Optional<Item> getItem(@ApiParam(value = "The number of the item", required = true)
-								  @PathVariable("itemNumber") int itemNumber) {
+								  @RequestParam Integer itemNumber) {
 		
 		return repo.findById(itemNumber);
 	}	
 	
 	@PutMapping("/item")
-	@ApiOperation(value = "Updates an item in the inventory", 
-				  notes = "Provide the updated form of the item; returned message will indicate if the operation was successful", 
+	@ApiOperation(value = "Withdraw/Deposit quantity of an item in the inventory", 
+				  notes = "Provide the number of the item and the required quantity to withdraw/deposit using a signed value respectively; returned message will indicate if the operation was successful", 
 				  response = String.class)
-	public String updateItem(@ApiParam(value = "The item itself", required = true)
-							 @RequestBody Item item) {
-
-		if (repo.findById(item.getItemNumber()).isPresent())
+	public String updateItem(@ApiParam(value = "The number of the item", required = true)
+							 @RequestParam Integer itemNumber,
+							 @ApiParam(value = "The required quantity to withdraw/deposit", required = true)
+	   						 @RequestParam Integer itemAmount) {
+		
+		Optional<Item> i = repo.findById(itemNumber);
+		
+		if (i.isPresent())
 		{
-			repo.save(item);
+			if (i.get().getItemAmount() + itemAmount < 0)
+			{
+				return "Error: the required quantity is greater than the available stock!";
+			}
 			
-			return "Item successfuly updated";
+			i.get().setItemAmount(i.get().getItemAmount() + itemAmount);
+			repo.save(i.get());
+			
+			return "Item successfuly updated.";
 		}
 		else
 		{
@@ -79,7 +84,7 @@ public class ItemController {
 		{
 			repo.save(item);
 			
-			return "Item successfuly added";
+			return "Item successfuly added.";
 		}
 		else
 		{
@@ -87,20 +92,22 @@ public class ItemController {
 		}
 	}
 	
-	@DeleteMapping("/item/{itemNumber}")
+	@DeleteMapping("/item")
 	@ApiOperation(value = "Deletes an item from the inventory", 
 	  			  notes = "Provide the number of the item to be deleted; returned message will indicate if the operation was successful", 
 	  			  response = String.class)
 	public String deleteItem(@ApiParam(value = "The number of the item", required = true)
-							 @PathVariable int itemNumber) {
+							 @RequestParam Integer itemNumber) {
 		
-		if (repo.findById(itemNumber).isEmpty())
+		Optional<Item> i = repo.findById(itemNumber);
+		
+		if (i.isEmpty())
 		{
 			return "Item not found!";
 		}
-		repo.delete(repo.getOne(itemNumber));
+		repo.deleteById(itemNumber);
 		
-		return "Item successfuly deleted!";
+		return "Item successfuly deleted.";
 	}
 	
 }
